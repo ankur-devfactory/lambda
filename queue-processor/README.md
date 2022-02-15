@@ -49,9 +49,4 @@ and if found sends an SNS notification in following format:
 2. Package: `sam package --s3-bucket <bucket-name>`
 3. Deploy: `sam deploy`
 
-**Boilerplate note** If you want to change the default configurations (e.g. AWS region), you can run `sam deploy --guided`, which will ask some questions and then update the `samconfig.toml` file.
-
-
-## Usage
-
-TODO Add usage instructions for your own solution.
+**Note** If you want to change the default configurations (e.g. AWS region, subscription email), you can run `sam deploy --guided`, which will ask some questions and then update the `samconfig.toml` file.
