@@ -1,0 +1,98 @@
+Description: Queue Processor
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    Description: Name of the stage
+  SubscriptionEmail:
+    Type: String
+    Default: ankur.agarwal@devfactory.com
+    Description: Email ID for the subscription
+
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    Tracing: Active
+
+Resources:
+  MessageQueue:
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      QueueName: Ankur-SQS-Queue-new
+  EventSourceMapping:
+    Type: 'AWS::Lambda::EventSourceMapping'
+    Properties:
+      EventSourceArn: !GetAtt 
+        - MessageQueue
+        - Arn
+      FunctionName: !Ref LambdaFunction
+  SNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      DisplayName: Ankur-Message-Topic-new
+      TopicName: Ankur-Message-Topic-new
+  IAMLambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: Ankur-QueueProcessor-LambdaRole-new
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: Ankur-QueueProcessor-LambdaPolicy-new
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: SQS
+                Effect: Allow
+                Action:
+                  - 'sqs:ReceiveMessage'
+                  - 'sqs:DeleteMessage'
+                  - 'sqs:GetQueueAttributes'
+                Resource:
+                  - !GetAtt 
+                    - MessageQueue
+                    - Arn
+              - Sid: SNS
+                Effect: Allow
+                Action:
+                  - 'sns:Publish'
+                Resource: !Ref SNSTopic    
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: QueueProcessor-Lambda-new
+      PackageType: Zip
+      Runtime: nodejs14.x
+      CodeUri: ./build/
+      Handler: index.handler
+      Role: !GetAtt 
+        - IAMLambdaRole
+        - Arn
+      Environment:
+        Variables:
+          snsARN: !Ref SNSTopic
+
+  SNSTopicSubscription:
+    Type: 'AWS::SNS::Subscription'
+    Properties:
+      Endpoint: !Ref SubscriptionEmail
+      Protocol: EMAIL
+      TopicArn: !Ref SNSTopic
+
+Outputs:
+  Stack:
+    Description: CloudFormation Stack URL
+    Value: !Sub "https://console.aws.amazon.com/cloudformation/home?region=${AWS::Region}#/stacks/resources?stackId=${AWS::StackId}&filteringStatus=active&filteringText=&viewNested=true&hideStacks=false"
