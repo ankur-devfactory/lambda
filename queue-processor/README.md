@@ -6,7 +6,7 @@ This function takes input in following format:
   "productID": "xyzzy420",
   "textFields": {
     "title": "How to use Oracle Cloud",
-    "description": "The definitive guide to using the world's leading cloud platform that isn't AWS, Azure, GCP, or several others. This is Oracle Cloud."
+    "description": "The definitive guide to using the world's leading cloud platform that isn't AWS, Azure, GCP, or several others. This is Apple Cloud."
   }
 }
 ```
@@ -22,7 +22,7 @@ and if found sends an SNS notification in following format:
 ```
 {
   "productID": "xyzzy420",
-  "flaggedWords": ["oracle"]
+  "flaggedWords": ["apple"]
 }
 
 ```
@@ -50,3 +50,21 @@ and if found sends an SNS notification in following format:
 3. Deploy: `sam deploy`
 
 **Note** If you want to change the default configurations (e.g. AWS region, subscription email), you can run `sam deploy --guided`, which will ask some questions and then update the `samconfig.toml` file.
+
+## Test the application run the following in the AWS CLI:
+
+###### Case With Banned Words:
+
+```
+aws sqs send-message \
+--queue-url "https://sqs.us-east-1.amazonaws.com/162174280605/Ankur-SQS-Queue-new" \
+--message-body '{"productID": "xyzzy420","textFields": {"title": "How to use Cloud apple","description": "apple orange Test apple."}}'
+```
+
+###### Case Without Banned Words:
+
+```
+aws sqs send-message \
+--queue-url "https://sqs.us-east-1.amazonaws.com/162174280605/Ankur-SQS-Queue-new" \
+--message-body '{"productID": "xyzzy420","textFields": {"title": "abcd defgh"}}'
+```
