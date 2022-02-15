@@ -1,6 +1,31 @@
-# Lambda Typescript & CloudFormation Boilerplate
+# Queue Processor
+This function takes input in following format:
 
-TODO Update this README file with your own solution's title and details.
+```
+{
+  "productID": "xyzzy420",
+  "textFields": {
+    "title": "How to use Oracle Cloud",
+    "description": "The definitive guide to using the world's leading cloud platform that isn't AWS, Azure, GCP, or several others. This is Oracle Cloud."
+  }
+}
+```
+
+and searches for banned words:
+
+```
+"apple", "banana", "orange", "strawberry", "cherry"
+```
+
+and if found sends an SNS notification in following format:
+
+```
+{
+  "productID": "xyzzy420",
+  "flaggedWords": ["oracle"]
+}
+
+```
 
 ## Getting Started
 
