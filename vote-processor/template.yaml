@@ -1,0 +1,76 @@
+Description: Vote Processor
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    Description: Name of the stage
+
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    Tracing: Active
+
+Resources:
+  IAMLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: allowLambdaLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - logs:*
+              Resource: arn:aws:logs:*:*:*
+        - PolicyName: allowDynamoDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource:
+                - !GetAtt DBTable.Arn
+                - !GetAtt DBTable.StreamArn    
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: VoteProcessor-Lambda-new
+      PackageType: Zip
+      Runtime: nodejs14.x
+      CodeUri: ./build/
+      Handler: vote.handler
+      Role: !GetAtt 
+        - IAMLambdaRole
+        - Arn
+      Events:
+        apiForLambda:
+          Type: HttpApi 
+          Properties:
+            Path: /vote
+            Method: post
+      Tags:
+        owner: ankur.agarwal@devfactory.com
+      Environment:
+        Variables:
+          VOTING_RESULT_TABLE: !Ref tpm-2394
+
+Outputs:
+  Stack:
+    Description: CloudFormation Stack URL
+    Value: !Sub "https://console.aws.amazon.com/cloudformation/home?region=${AWS::Region}#/stacks/resources?stackId=${AWS::StackId}&filteringStatus=active&filteringText=&viewNested=true&hideStacks=false"
