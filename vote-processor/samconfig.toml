@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1w4aey6a6umtv"
+region = "us-east-1"
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = "Stage=\"dev\" SubscriptionEmail=\"ankur.agarwal@devfactory.com\""
+image_repositories = []
+stack_name = "TPM-2394"
+s3_prefix = "TPM-2394"
+confirm_changeset = true
