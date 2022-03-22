@@ -11,6 +11,23 @@ type Vote = {
 const dynamoDB = new DynamoDB();
 const voting_table = process.env.VOTING_TABLE ;
 
+const insertVote = async (email: string, programmer: string): Promise<any> => {
+  const week = weekNumber();
+  const insertVote = `INSERT INTO "${voting_table}" value 
+      {'user' : '${email}##${week}',
+       'type' : 'Vote'
+      'programmer': '${programmer}',
+      'time':'${new Date()}'
+    }`;
+  await dynamoDB
+    .executeStatement({
+      Statement: insertVote,
+    })
+    .promise()
+    .catch((reason: any) => {
+      console.log(reason);
+    });
+};
 const weekNumber = (): number => {
     // Get Week Number
     // Code referenced from https://www.delftstack.com/howto/javascript/javascript-get-week-number/
@@ -65,23 +82,4 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     headers: { "Content-Type": "application/json" },
     body: "Vote Submitted",
   };
-};
-
-
-
-const insertVote = async (email: string, programmer: string): Promise<any> => {
-  const week = weekNumber();
-  const insertVote = `INSERT INTO "${voting_table}" value 
-      {'user' : '${email}##${week}',
-      'programmer': '${programmer}',
-      'time':'${new Date()}'
-    }`;
-  await dynamoDB
-    .executeStatement({
-      Statement: insertVote,
-    })
-    .promise()
-    .catch((reason: any) => {
-      console.log(reason);
-    });
 };
