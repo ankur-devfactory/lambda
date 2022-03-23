@@ -45,12 +45,11 @@ Resources:
               Action:
                 - dynamodb:*
               Resource:
-                - !GetAtt DBTable.Arn
-                - !GetAtt DBTable.StreamArn    
-  LambdaFunction:
+                - arn:aws:dynamodb:us-east-1:162174280605:table/tpm-2394
+  VoteLambda:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: VoteProcessor-Lambda-new
+      FunctionName: VoteLambda-tpmspec2449
       PackageType: Zip
       Runtime: nodejs14.x
       CodeUri: ./build/
@@ -59,13 +58,34 @@ Resources:
         - IAMLambdaRole
         - Arn
       Events:
-        apiForLambda:
+        APIEvent:
           Type: HttpApi 
           Properties:
             Path: /vote
             Method: post
-      Tags:
-        owner: ankur.agarwal@devfactory.com
+      Environment:
+        Variables:
+          VOTING_RESULT_TABLE: !Ref tpm-2394
+  StreamLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: StreamLambda-tpmspec2449
+      PackageType: Zip
+      Runtime: nodejs14.x
+      CodeUri: ./build/
+      Handler: stream.handler
+      Role: !GetAtt 
+        - IAMLambdaRole
+        - Arn
+      Events:
+        StreamEvent:
+          Type: DynamoDB 
+          Properties:
+            Stream: arn:aws:dynamodb:us-east-1:123456789012:table/TestTable/stream/2016-08-11T21:21:33.291
+            StartingPosition: LATEST
+            FilterCriteria: 
+              Filters:
+                Pattern: "type": [ "vote" ]  
       Environment:
         Variables:
           VOTING_RESULT_TABLE: !Ref tpm-2394
