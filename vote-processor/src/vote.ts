@@ -1,5 +1,3 @@
-
-   
 import {APIGatewayProxyEventV2,APIGatewayProxyHandlerV2,APIGatewayProxyResultV2} from "aws-lambda";
 import { DynamoDB } from "aws-sdk";
 
@@ -12,13 +10,17 @@ const dynamoDB = new DynamoDB();
 const voting_table = process.env.VOTING_TABLE ;
 
 const insertVote = async (email: string, programmer: string): Promise<any> => {
-  const week = weekNumber();
+  console.log('here');
+  const week = weekNumber().toString();
+  const year = yearNumber().toString();
   const insertVote = `INSERT INTO "${voting_table}" value 
-      {'user' : '${email}##${week}',
-       'type' : 'Vote'
-      'programmer': '${programmer}',
-      'time':'${new Date()}'
+      {'user' : '${email}#${week}#${year}',
+       'rec_type' : 'Vote',
+       'year' : ${year},
+       'weekNumber': ${week},
+      'programmer': '${programmer}'
     }`;
+    console.log(insertVote);
   await dynamoDB
     .executeStatement({
       Statement: insertVote,
@@ -34,7 +36,14 @@ const weekNumber = (): number => {
     var currentdate = new Date();
     var oneJan = new Date(currentdate.getFullYear(),0,1);
     var numberOfDays = Math.floor(((currentdate as any)  - (oneJan as any)) / (24 * 60 * 60 * 1000));
-    return Math.ceil(( currentdate.getDay() + 1 + numberOfDays) / 7);
+    var weekNumber = Math.ceil(( currentdate.getDay() + 1 + numberOfDays) / 7);
+    console.log(weekNumber);
+    return weekNumber;
+  };
+
+  const yearNumber = (): number => {
+    console.log(new Date().getFullYear());
+    return new Date().getFullYear();
   };
 
 const checkProgrammer = (programmer: string): boolean => {
@@ -59,7 +68,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> => {
     const input: Vote = JSON.parse(event.body || "{}");
-  console.log("input:", input);
 
   let validity = false;
   // check if a programmer is due for voting and the time within stipulated voting time.
@@ -73,13 +81,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (
     return {
         statusCode: 200,
         headers: { "Content-Type": "application/json" },
-        body: "Vote not submitted",
+        body: "",
       };
   }
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
-    body: "Vote Submitted",
+    body: "",
   };
 };
