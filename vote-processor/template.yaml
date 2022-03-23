@@ -7,6 +7,10 @@ Parameters:
     Type: String
     Default: dev
     Description: Name of the stage
+  tablename:
+    Type: String
+    Default: tpm-2394
+    Description: Name of the Dynamo DB Table
 
 Globals:
   Function:
@@ -88,7 +92,7 @@ Resources:
                 Pattern: "type": [ "vote" ]  
       Environment:
         Variables:
-          VOTING_RESULT_TABLE: !Ref tpm-2394
+          VOTING_RESULT_TABLE: !Ref tablename
 
 Outputs:
   Stack:
