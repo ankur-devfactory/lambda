@@ -21,7 +21,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
                 const year_week = year + "_" + week;
                 body = await dynamo
                     .query({
-                        TableName: voting_result_table,
+                        TableName: voting_table,
                         KeyConditionExpression: 'year_week = :yw',
                         ExpressionAttributeValues: {
                             ':yw': year_week
