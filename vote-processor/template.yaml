@@ -11,6 +11,10 @@ Parameters:
     Type: String
     Default: tpm-2449
     Description: Name of the Dynamo DB Table
+  tablenameagg:
+    Type: String
+    Default: tpm-2449-agg
+    Description: Name of the Aggregate/Stream Dynamo DB Table
 
 Globals:
   Function:
@@ -33,15 +37,7 @@ Resources:
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
       Policies:
-        - PolicyName: allowLambdaLogs-tpm2449
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-            - Effect: Allow
-              Action:
-              - logs:*
-              Resource: arn:aws:logs:*:*:*
-        - PolicyName: allowDynamoDB-tpm2449
+        - PolicyName: DynamoDB-tpm2449
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -50,15 +46,8 @@ Resources:
                 - dynamodb:*
               Resource:
                 - arn:aws:dynamodb:us-east-1:162174280605:table/tpm-2449
-        - PolicyName: allowDynamoDBStream-tpm2449
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:*
-              Resource:
-                - arn:aws:dynamodb:us-east-1:162174280605:table/tpm-2449/stream/2022-03-23T08:23:07.321
+                - arn:aws:dynamodb:us-east-1:162174280605:table/tpm-2449-agg
+                - arn:aws:dynamodb:us-east-1:162174280605:table/tpm-2449/stream/2022-03-28T14:14:01.566
   VoteLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -94,11 +83,11 @@ Resources:
         StreamEvent:
           Type: DynamoDB 
           Properties:
-            Stream: arn:aws:dynamodb:us-east-1:162174280605:table/tpm-2449/stream/2022-03-23T08:23:07.321
+            Stream: arn:aws:dynamodb:us-east-1:162174280605:table/tpm-2449/stream/2022-03-28T14:14:01.566
             StartingPosition: LATEST
       Environment:
         Variables:
-          VOTING_TABLE: !Ref tablename
+          VOTING_AGGREGATE_TABLE: !Ref tablenameagg
   ResultLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -118,7 +107,7 @@ Resources:
             Method: get
       Environment:
         Variables:
-          VOTING_TABLE: !Ref tablename
+          VOTING_AGGREGATE_TABLE: !Ref tablenameagg
 
 Outputs:
   Stack:

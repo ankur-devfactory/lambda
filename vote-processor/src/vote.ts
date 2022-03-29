@@ -37,6 +37,9 @@ const weekNumber = (): number => {
     var oneJan = new Date(currentdate.getFullYear(),0,1);
     var numberOfDays = Math.floor(((currentdate as any)  - (oneJan as any)) / (24 * 60 * 60 * 1000));
     var weekNumber = Math.ceil(( currentdate.getDay() + 1 + numberOfDays) / 7);
+    console.log(currentdate.getDay());
+    console.log(numberOfDays);
+    console.log(oneJan);
     console.log(weekNumber);
     return weekNumber;
   };

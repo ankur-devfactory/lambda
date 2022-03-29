@@ -4,10 +4,22 @@ import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
 
 const dynamo = new DocumentClient();
-const voting_table = process.env.VOTING_TABLE;
+const voting_table = process.env.VOTING_AGGREGATE_TABLE;
+
+type Request = {
+  accessKey: string;
+};
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     
+    const input: Request = JSON.parse(event.body || "{}");
+    if (input.accessKey != 'tpm-2449'){
+      return { 
+        statusCode: 403,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify("Invalid Access Key! Access Denied."),
+      }
+    }
     let result = await getVoteCount();
   
     return {
@@ -33,15 +45,16 @@ const yearNumber = (): number => {
   };
 
 const getVoteCount = (): any => {
-    let voteKey = 'Votecount' + '#' + yearNumber().toString() + '#' + weekNumber().toString();
-    console.log(voteKey);
-    var result =  dynamo.scan({
-                        TableName: voting_table,
-                        FilterExpression: 'rec_type = :ty',
-                        ExpressionAttributeValues: {
-                            ':ty': voteKey
-                        }
-                    })
+  let voteKey = yearNumber().toString() + '#' + weekNumber().toString();
+  var params = {
+    TableName : voting_table,
+    KeyConditionExpression: "uniqueWeek = :uw",
+    ExpressionAttributeValues: {
+        ":uw": voteKey
+    }
+  };
+  console.log(voteKey);
+  var result =  dynamo.query(params)
                     .promise();
-    return result;
+  return result;
 }

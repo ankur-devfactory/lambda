@@ -1,7 +1,7 @@
 import { DynamoDBStreamEvent, DynamoDBStreamHandler } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 const dynamo = new DocumentClient();
-const voting_table = process.env.VOTING_TABLE ;
+const voting_table = process.env.VOTING_AGGREGATE_TABLE ;
 
 export const handler: DynamoDBStreamHandler = async (event: DynamoDBStreamEvent) => {
     await Promise.all(event.Records.map(async record => {
@@ -13,10 +13,10 @@ export const handler: DynamoDBStreamHandler = async (event: DynamoDBStreamEvent)
 }
 
 export const addVote = async (programmer: string, year: string, weekNumber: string) => {
-    let type = 'Votecount' + '#' + year + '#' + weekNumber;
+    let uniqueWeek =   year + '#' + weekNumber;
     await dynamo.update({
         TableName: voting_table,
-        Key: { user: programmer,rec_type: type },
+        Key: { uniqueWeek: uniqueWeek , programmer: programmer },
         UpdateExpression: 'add noOfvotes :one',
         ExpressionAttributeValues: {
           ':one': 1
