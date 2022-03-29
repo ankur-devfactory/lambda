@@ -1,33 +1,81 @@
-# Queue Processor
-This function takes input in following format:
+# Vote Processor
+This function creates two external facing function.
+
+1) Function to register vote.
+
+# Input:
 
 ```
 {
-  "productID": "xyzzy420",
-  "textFields": {
-    "title": "How to use Oracle Cloud",
-    "description": "The definitive guide to using the world's leading cloud platform that isn't AWS, Azure, GCP, or several others. This is Apple Cloud."
-  }
+ "email": "priyanka.agarwal0012@devfactory.com",
+ "programmer": "odd_p4"
 }
 ```
 
-and searches for banned words:
+# Request Parameters:
+a) Email: It is the email of the person casting vote
+b) Programmer: It is the programmer receiving the vote.
+
+# Validation Condition:
+a) One person (one unique email id) can cast only 1 vote in a given week.
+b) The voting can happen on weekdays only.
+c) There are two list of participants, and each is valid for one week & then it rolls over to other list. Below is the list:
 
 ```
-"apple", "banana", "orange", "strawberry", "cherry"
+      ["even_p1", "even_p2", "even_p3", "even_p4"] // Even Week
+      ["odd_p1", "odd_p2", "odd_p3", "odd_p4"] // Odd Week
 ```
 
-and if found sends an SNS notification in following format:
+# Output: 
+It stores this vote in DynamoDB Table, but returns nothing.
+
+2) Function to get the count of casted votes for current week.
+
+# Input:
 
 ```
 {
-  "productID": "xyzzy420",
-  "flaggedWords": ["apple"]
+"accessKey": "tpm-2449"
 }
 
 ```
 
-## Getting Started
+# Request Parameters:
+a) accessKey: It is the key provided to access the API, it should be passed as “tpm-2449” only.
+
+# Output: 
+It retrives the vote count and returns the information in below format.
+
+```
+{
+   "Items": [
+       {
+           "noOfvotes": 2,
+           "programmer": "odd_p1",
+           "uniqueWeek": "2022#13"
+       },
+       {
+           "noOfvotes": 1,
+           "programmer": "odd_p2",
+           "uniqueWeek": "2022#13"
+       },
+       {
+           "noOfvotes": 5,
+           "programmer": "odd_p3",
+           "uniqueWeek": "2022#13"
+       },
+       {
+           "noOfvotes": 2,
+           "programmer": "odd_p4",
+           "uniqueWeek": "2022#13"
+       }
+   ],
+   "Count": 4,
+   "ScannedCount": 4
+}
+```
+
+## Getting Started with Installation
 
 1- Install Dependencies
  ```
@@ -50,21 +98,3 @@ and if found sends an SNS notification in following format:
 3. Deploy: `sam deploy`
 
 **Note** If you want to change the default configurations (e.g. AWS region, subscription email), you can run `sam deploy --guided`, which will ask some questions and then update the `samconfig.toml` file.
-
-## Test the application run the following in the AWS CLI:
-
-###### Case With Banned Words:
-
-```
-aws sqs send-message \
---queue-url "https://sqs.us-east-1.amazonaws.com/162174280605/Ankur-SQS-Queue-new" \
---message-body '{"productID": "xyzzy420","textFields": {"title": "How to use Cloud apple","description": "apple orange Test apple."}}'
-```
-
-###### Case Without Banned Words:
-
-```
-aws sqs send-message \
---queue-url "https://sqs.us-east-1.amazonaws.com/162174280605/Ankur-SQS-Queue-new" \
---message-body '{"productID": "xyzzy420","textFields": {"title": "abcd defgh"}}'
-```
