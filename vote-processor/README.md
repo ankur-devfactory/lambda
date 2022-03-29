@@ -13,13 +13,13 @@ This function creates two external facing function.
 ```
 
 # Request Parameters:
-a) Email: It is the email of the person casting vote
-b) Programmer: It is the programmer receiving the vote.
+ * Email: It is the email of the person casting vote
+ * Programmer: It is the programmer receiving the vote.
 
 # Validation Condition:
-a) One person (one unique email id) can cast only 1 vote in a given week.
-b) The voting can happen on weekdays only.
-c) There are two list of participants, and each is valid for one week & then it rolls over to other list. Below is the list:
+ * One person (one unique email id) can cast only 1 vote in a given week.
+ * The voting can happen on weekdays only.
+ * There are two list of participants, and each is valid for one week & then it rolls over to other list. Below is the list:
 
 ```
       ["even_p1", "even_p2", "even_p3", "even_p4"] // Even Week
@@ -41,7 +41,7 @@ It stores this vote in DynamoDB Table, but returns nothing.
 ```
 
 # Request Parameters:
-a) accessKey: It is the key provided to access the API, it should be passed as “tpm-2449” only.
+ * accessKey: It is the key provided to access the API, it should be passed as “tpm-2449” only.
 
 # Output: 
 It retrives the vote count and returns the information in below format.
